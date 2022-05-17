@@ -46,7 +46,7 @@ impl Block {
     
     ///count the number of neighbor a given cell has
     pub fn get_neighbors(grid: Array3::<i8>, x: i8, y:i8, z:i8) -> i8 {
-        
+        neighbor_params.iter().filter(|p| grid[[x + p[0], y+p[1], z+p[2]]] > 0).collect().len()
     }
 
 }
