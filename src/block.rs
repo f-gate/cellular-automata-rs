@@ -20,11 +20,10 @@ pub struct Block {
 impl Block {
 
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn init(&mut self, start_shape: setting::StartShape, size_factor: f32) -> Array3::<i8> {
+    pub fn init(&mut self, start_shape: setting::StartShape, size_factor: f32, s_rule: i8) -> Array3::<i8> {
         match start_shape {
             settings::StartShape::Diamond => {
-                //init with one 
-                //recurse for neighbor count
+                //init with one as all thats needed for alive
                 //return diamond shape
             } ,
             settings::StartShape::Cube => {
@@ -34,11 +33,36 @@ impl Block {
         }
     }
     
-    pub fn update_grid_moore(&mut grid: Array3::<i8>, n_rule: [bool;27], b_rule: [bool;27], s_rule: [bool;27]) {
+    ///passes in a grid and makes changes based on given rules
+    /// nrule is how many to stay alive, brule for to be born, srule for hoe many game tics till dead
+    pub fn update_grid_moore(&mut grid: Array3::<i8>, n_rule: [bool;27], b_rule: [bool;27], s_rule: i8) {
         for x in 0..=SIZE {
             for y in 0..=SIZE {
                 for z in 0..=SIZE {
-                    grid[[x, y, z]] = get_neighbors(grid, x, y, z);
+                    let neighbors: i8 = get_neighbors(grid, x, y, z);
+                    let grid_val = grid[[x, y, z]];
+                    
+                    //0 = alive
+                    //1 = dead
+                    //anything more is state
+
+                    //if dead
+                    if grid_val > 1 {
+                        if b_rule[neighbors] == true {
+                                //come alive
+                                grid[[x, y, z]] = s_rule; 
+                            } else {
+                                //decrease state by 1
+                                grid[[x, y, z]] = grid_val - 1;
+                            }
+                    } else {
+                        //value will be 0 if alive
+                        if n_rule[neighbors] == true {
+
+                            }
+                    }
+                    
+                    
                 }
             }   
         }

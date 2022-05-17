@@ -6,27 +6,24 @@ use eframe::egui;
 
     impl CellAutomata {
         pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-            // Customize egui here with cc.egui_ctx.set_fonts and cc.egui_ctx.set_visuals.
-            // Restore app state using cc.storage (requires the "persistence" feature).
-            // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
-            // for e.g. egui::PaintCallback.
+            //can do cool stuff here
             Self::default()
         }
+
         fn custom_painting(&mut self, ui: &mut egui::Ui) {
             let (rect, response) =
-                ui.allocate_exact_size(egui::Vec2::splat(512.0), egui::Sense::drag());
+                ui.allocate_exact_size(egui::Vec2::splat(1000.0), egui::Sense::drag());
     
-            let mut angle = 0.0;    
-            angle += response.drag_delta().x * 0.01;
-    
-            // Clone locals so we can move them into the paint callback:
+            let angle = response.drag_delta().x * 0.01;  
     
             let callback = egui::PaintCallback {
                 rect,
                 callback: std::sync::Arc::new(move |info, render_ctx| {
                     if let Some(painter) = render_ctx.downcast_ref::<egui_glow::Painter>() {
+
                         with_three_d_context(painter.gl(), |three_d| {
                             paint_with_three_d(three_d, info, angle);
+
                         });
                     } else {
                         eprintln!("Can't do custom painting because we are not using a glow context");
@@ -40,7 +37,7 @@ use eframe::egui;
     impl eframe::App for CellAutomata {
         fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
             egui::CentralPanel::default().show(ctx, |ui| {
-                ui.heading("Hello World!");
+                ui.heading("3D Cellular Automata");
                 
                 egui::ScrollArea::both().show(ui, |ui| {
                     egui::Frame::canvas(ui.style()).show(ui, |ui| {
@@ -54,6 +51,9 @@ use eframe::egui;
             
         }
     }
+
+
+    
     /// We get a [`glow::Context`] from `eframe`, but we want a [`three_d::Context`].
 ///
 /// Sadly we can't just create a [`three_d::Context`] in [`MyApp::new`] and pass it
@@ -77,7 +77,6 @@ fn with_three_d_context<R>(
 }
 
 fn paint_with_three_d(three_d: &three_d::Context, info: &egui::PaintCallbackInfo, angle: f32) {
-    // Based on https://github.com/asny/three-d/blob/master/examples/triangle/src/main.rs
     use three_d::*;
 
     // Set where to paint
@@ -119,11 +118,13 @@ fn paint_with_three_d(three_d: &three_d::Context, info: &egui::PaintCallbackInfo
         vec3(-0.5, -0.5, 0.0), // bottom left
         vec3(0.0, 0.5, 0.0),   // top
     ];
+
     let colors = vec![
         Color::new(255, 0, 0, 255), // bottom right
         Color::new(0, 255, 0, 255), // bottom left
         Color::new(0, 0, 255, 255), // top
     ];
+
     let cpu_mesh = CpuMesh {
         positions: Positions::F32(positions),
         colors: Some(colors),
