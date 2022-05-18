@@ -48,16 +48,15 @@ impl Block {
 
                     match grid_val {
                         0 => {
-                            //if the right amount of neighbors the stay alive else die
-                            //flipped for efficiency
-                            if n_rule[neighbors] != true {
-                                grid[[x, y, z]] = grid_val;
-                            }
+                            //if the right amount of neighbors then stay alive else die
+                            if n_rule[neighbors] == false {
+                                grid[[x, y, z]] = s_rule;
+                            } 
                         },
                         1 => {
-                            //if dead check against rule and maybe come alive with state max
+                            //if dead check against rule and maybe come alive
                             if b_rule[neighbors] == true {
-                                grid[[x, y, z]] = s_rule;
+                                grid[[x, y, z]] = 0;
                             }
                             continue;
                         },
@@ -67,10 +66,6 @@ impl Block {
                         },
 
                     }
-
-                    
-                    
-                    
                 }
             }   
         }
