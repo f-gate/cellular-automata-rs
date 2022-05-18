@@ -46,21 +46,29 @@ impl Block {
                     //1 = dead
                     //anything more is state
 
-                    //if dead
-                    if grid_val > 1 {
-                        if b_rule[neighbors] == true {
-                                //come alive
-                                grid[[x, y, z]] = s_rule; 
-                            } else {
-                                //decrease state by 1
+                    match grid_val {
+                        0 => {
+                            //if the right amount of neighbors the stay alive else die
+                            //flipped for efficiency
+                            if n_rule[neighbors] != true {
+                                grid[[x, y, z]] = grid_val;
+                            }
+                        },
+                        1 => {
+                            //if dead check against rule and maybe come alive with state max
+                            if b_rule[neighbors] == true {
+                                grid[[x, y, z]] = s_rule;
+                            }
+                            continue;
+                        },
+                        _ => {
+                            //down a val per game tick until 1
                                 grid[[x, y, z]] = grid_val - 1;
-                            }
-                    } else {
-                        //value will be 0 if alive
-                        if n_rule[neighbors] == true {
+                        },
 
-                            }
                     }
+
+                    
                     
                     
                 }
