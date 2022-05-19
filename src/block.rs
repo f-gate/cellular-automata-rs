@@ -23,7 +23,7 @@ pub struct Block {
 
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn init(start_shape: settings::StartShape, size_bounds: i16, size_factor: f32) -> Array3::<i8> {
+    pub fn init(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, size_factor: f32) -> Array3::<i8> {
         let mut grid = Block::get_fresh_grid(&size_bounds);
         match start_shape.shape {
             settings::Shape::Diamond => {
@@ -31,13 +31,14 @@ impl Block {
                 //return diamond shape
             },
             settings::Shape::Cube => {
-                let edge = (size_bounds as f32 * size_factor).cbrt().round() as i32;
+                let draw_bounds = ((*edge - 1) as f32 * size_factor).round() as i16 ;
+                println!("{:?}", draw_bounds);
                 if start_shape.is_hollow {
                     //todo
                 } else {
-                    for x in 0..=edge {
-                        for y in 0..=edge {
-                            for z in 0..=edge {
+                    for x in 0..draw_bounds {
+                        for y in 0..draw_bounds {
+                            for z in 0..draw_bounds {
                                 grid[[x as usize, y as usize, z as usize]] = 0;
                             }
                         }
@@ -51,7 +52,7 @@ impl Block {
     }
 
     ///get fresh grid on ones(dead and ready for respawn)
-    fn get_fresh_grid(size_bounds: &i16) -> Array3<i8> {
+    pub fn get_fresh_grid(size_bounds: &i16) -> Array3<i8> {
         let edge = (*size_bounds as f32).cbrt().ceil() as usize;
         Array3::<i8>::ones((edge, edge, edge))
     }

@@ -1,5 +1,8 @@
 use eframe::egui;
 
+
+
+// CURRNTLY BOILER PLATE CODE FROM EFRAME EXAMPLE:: IGNORE FOR NOW
     
     #[derive(Default)]
     pub struct CellAutomata {}
