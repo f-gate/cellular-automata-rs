@@ -1,6 +1,10 @@
+use std::*;
+use std::ops::*;
+
+
 pub enum RuleGroup {
-    Single(i32),
-    Multiple(Vec<i32>)
+    Single(i8),
+    Multiple(Vec<i8>)
 }
 pub enum RuleType {
     Survival,
@@ -16,12 +20,15 @@ pub struct Rule {
 
 impl Rule {
     pub fn get_binary_rule(&self) -> [bool; 27] {
-        match ruletype(v) {
-            RuleGroup::Single => {[bool; 27][v] = true},
+        let mut out: [bool; 27] = [false; 27];
+        match &self.rulegroup {
+            RuleGroup::Single(n) => {
+                out[*n as usize] = true;
+                return out
+            },
 
-            RuleGroup::Multiple => {
-                let mut out = [bool; 27];
-                v.iter().map(|i| out[i] = true);
+            RuleGroup::Multiple(v) => {
+                v.iter().map(|i| out[*i as usize] = true);
                 out
             },
 

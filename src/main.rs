@@ -1,7 +1,10 @@
+use block::Block;
 use eframe::egui;
 
+mod rule;
 mod gui;
-
+mod block;
+mod settings;
 fn main() {
 
     let native_options = eframe::NativeOptions::default();
