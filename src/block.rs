@@ -1,11 +1,14 @@
 use ndarray::Array3;
 use std::*;
 use crate::settings as settings;
+
+#[derive(Debug)]
 pub enum Method {
     VonNeumann, 
     Moore
 }
 /// an item containing all the cells to be passed to rendering and designating rules.
+#[derive(Debug)]
 pub struct Block {
     pub method: Method,
     pub edge: i16,
@@ -20,15 +23,15 @@ pub struct Block {
 
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn init(start_shape: settings::StartShape, block: Block, s_rule: i8) -> Array3::<i8> {
-        let mut grid = Block::get_fresh_grid(&block.size_bounds);
+    pub fn init(start_shape: settings::StartShape, size_bounds: i16, size_factor: f32) -> Array3::<i8> {
+        let mut grid = Block::get_fresh_grid(&size_bounds);
         match start_shape.shape {
             settings::Shape::Diamond => {
                 //init with one as all thats needed for alive
                 //return diamond shape
             },
             settings::Shape::Cube => {
-                let edge = (block.size_bounds as f32 * block.size_factor).cbrt().round() as i32;
+                let edge = (size_bounds as f32 * size_factor).cbrt().round() as i32;
                 if start_shape.is_hollow {
                     //todo
                 } else {
@@ -47,6 +50,7 @@ impl Block {
         return grid
     }
 
+    ///get fresh grid on ones(dead and ready for respawn)
     fn get_fresh_grid(size_bounds: &i16) -> Array3<i8> {
         let edge = (*size_bounds as f32).cbrt().ceil() as usize;
         Array3::<i8>::ones((edge, edge, edge))

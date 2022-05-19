@@ -10,12 +10,11 @@ pub enum RuleType {
     Survival,
     Birth,
     State,
-    Neighbor
 }
 
 pub struct Rule {
-    ruletype: RuleType,
-    rulegroup: RuleGroup
+    pub ruletype: RuleType,
+    pub rulegroup: RuleGroup
 }
 
 impl Rule {
