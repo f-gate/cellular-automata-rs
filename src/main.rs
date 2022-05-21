@@ -8,8 +8,8 @@ mod settings;
 fn main() {
     let block_edge_max: i16 = 8;
     let SIZE_FACTOR = 0.5;
-
     let SIZE_BOUNDS: i16 = (block_edge_max - 1).pow(3);
+    
     let START_SHAPE = settings::StartShape {
         shape: settings::Shape::Cube,
         is_hollow: false,
@@ -40,11 +40,12 @@ fn main() {
         n_rule: n_rule_p.get_binary_rule(),
         s_rule: s_rule_v,
         b_rule: b_rule_p.get_binary_rule(),
-        grid: block::Block::init(START_SHAPE, &(block_edge_max - 1), &SIZE_BOUNDS, SIZE_FACTOR),
+        grid: block::Block::init(START_SHAPE, &(block_edge_max), &SIZE_BOUNDS, SIZE_FACTOR),
     };
 
     println!("{:?}", block.grid);
     println!("{:?}", Block::get_fresh_grid(&SIZE_BOUNDS));
+    println!("{:?}", Block::get_neighbors(&block.grid, 1,1,1, &block::Method::Moore));
 
 
 

@@ -27,6 +27,7 @@ impl Block {
         let mut grid = Block::get_fresh_grid(&size_bounds);
         match start_shape.shape {
             settings::Shape::Diamond => {
+                //todo:
                 //init with one as all thats needed for alive
                 //return diamond shape
             },
@@ -65,12 +66,11 @@ impl Block {
 
         //because box value 1 is dead
         let s_rule = self.s_rule + 1;
-        let edge = self.edge as i8;
         let old_grid  = self.grid.clone();
-        for x in 0..= edge as usize {
-            for y in 0..= edge as usize {
-                for z in 0..= edge as usize {
-                    let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z);
+        for x in 1.. self.edge as usize {
+            for y in 1.. self.edge as usize {
+                for z in 1.. self.edge as usize {
+                    let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
 
                     let grid_val: i8= old_grid[[x, y, z]];
                     
@@ -104,9 +104,25 @@ impl Block {
     }
     
     //get sum of neighbors that == 0
-    pub fn get_neighbors(grid: &Array3::<i8>, x: usize, y:usize, z:usize) -> usize {
+    pub fn get_neighbors(grid: &Array3::<i8>, x: usize, y:usize, z:usize, method: &Method) -> usize {
+        if y == 0 || x == 0 || z == 0 {
+            panic!("cannot get neighbors of an edge. ")
+        }
+
+        match method {
+            Method::Moore => {
+                //filter any neighbors thats value is not alive (0) and collect.len()
+                settings::neighbor_params_moore
+                .iter()
+                .filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+            },
+            Method::VonNeumann => {
+                //todo
+                10 as usize
+            },
+        }
         //i think it works lol 19/05
-        settings::neighbor_params_moore.iter().filter(|p| grid[[x + (p[0] as usize), y+(p[1] as usize), z+(p[2] as usize)]] == 0).collect::<Vec<&[i8; 3]>>().len()
+
     }
 
 }
