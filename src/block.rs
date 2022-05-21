@@ -31,14 +31,14 @@ impl Block {
                 //return diamond shape
             },
             settings::Shape::Cube => {
-                let draw_bounds = ((*edge - 1) as f32 * size_factor).round() as i16 ;
-                println!("{:?}", draw_bounds);
+                let draw_length = ((*edge - 1) as f32 * size_factor).round() as i16 ;
+                let instep = ((edge - draw_length) as f32 / 2.0) as i16;
                 if start_shape.is_hollow {
                     //todo
                 } else {
-                    for x in 0..draw_bounds {
-                        for y in 0..draw_bounds {
-                            for z in 0..draw_bounds {
+                    for x in instep..instep+draw_length {
+                        for y in instep..instep+draw_length {
+                            for z in instep..instep+draw_length {
                                 grid[[x as usize, y as usize, z as usize]] = 0;
                             }
                         }
@@ -52,6 +52,7 @@ impl Block {
     }
 
     ///get fresh grid on ones(dead and ready for respawn)
+    //todo:: pass in edge?
     pub fn get_fresh_grid(size_bounds: &i16) -> Array3<i8> {
         let edge = (*size_bounds as f32).cbrt().ceil() as usize;
         Array3::<i8>::ones((edge, edge, edge))
@@ -70,9 +71,6 @@ impl Block {
             for y in 0..= edge as usize {
                 for z in 0..= edge as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z);
-                    let x = x as usize;
-                    let y = y as usize;
-                    let z = z as usize;
 
                     let grid_val: i8= old_grid[[x, y, z]];
                     

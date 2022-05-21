@@ -40,7 +40,7 @@ fn main() {
         n_rule: n_rule_p.get_binary_rule(),
         s_rule: s_rule_v,
         b_rule: b_rule_p.get_binary_rule(),
-        grid: block::Block::init(START_SHAPE, &block_edge_max, &SIZE_BOUNDS, SIZE_FACTOR),
+        grid: block::Block::init(START_SHAPE, &(block_edge_max - 1), &SIZE_BOUNDS, SIZE_FACTOR),
     };
 
     println!("{:?}", block.grid);
