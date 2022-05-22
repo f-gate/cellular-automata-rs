@@ -1,6 +1,4 @@
 use std::*;
-use std::ops::*;
-
 
 pub enum RuleGroup {
     Single(i8),
@@ -27,8 +25,10 @@ impl Rule {
             },
 
             RuleGroup::Multiple(v) => {
-                v.iter().map(|i| out[*i as usize] = true);
-                out
+                for val in v {
+                    out[(val - 1) as usize] = true;
+                }
+                return out
             },
 
         }

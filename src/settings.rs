@@ -1,3 +1,11 @@
+pub const TRANSLATIONS_VON: [[i8; 3]; 6] = [
+    [1, 0, 0],
+    [-1, 0, 0],
+    [0, 1, 0],
+    [0, -1, 0],
+    [0, 0, 1],
+    [0, 0, -1],
+];
 
 
 //todo: the other type

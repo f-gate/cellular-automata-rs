@@ -33,7 +33,7 @@ impl Block {
             },
             settings::Shape::Cube => {
 
-                let mut draw_length = (*edge - (step_in * 2)) as i16 ;
+                let draw_length = (*edge - (step_in * 2)) as i16 ;
                 let instep = step_in;
 
                 let max = draw_length + instep; 
@@ -124,19 +124,23 @@ impl Block {
         if y == 0 || x == 0 || z == 0 {
             panic!("Edges of the cube is out of bounds!!")
         }
-
         match method {
+            //filter any neighbors thats value is alive (0) and collect.len()
             Method::Moore => {
-                //filter any neighbors thats value is alive (0) and collect.len()
-                settings::TRANSLATIONS_MOORE
-                .iter()
-                .filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+                let params  = settings::TRANSLATIONS_MOORE;
+             
+                params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+
             },
             Method::VonNeumann => {
-                //todo
-                10 as usize
+                let params  = settings::TRANSLATIONS_VON;
+
+                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+                
             },
         }
+
+
 
     }
 
