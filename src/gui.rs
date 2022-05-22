@@ -1,4 +1,5 @@
 use eframe::egui;
+use eframe::egui::Grid;
 use crate::block as block;
 use crate::settings as settings;
 use crate::rule ;
@@ -45,8 +46,8 @@ use crate::rule ;
                 s_rule_v = v;
             }
 
-            let block = block::Block {
-                method: block::Method::Moore,
+            let mut block = block::Block {
+                method: block::Method::VonNeumann,
                 edge: block_edge_max,
                 step_in: step_in,
                 size_bounds: size_bounds,
@@ -55,6 +56,14 @@ use crate::rule ;
                 b_rule: b_rule_p.get_binary_rule(),
                 grid: block::Block::init(start_shape, &(block_edge_max - step_in), &size_bounds, step_in),
             };
+            block.update_grid();
+            println!("{:?}", block.grid);
+            block.update_grid();
+            block.update_grid();
+            block.update_grid();
+            block.update_grid();
+            block.update_grid();
+            println!("{:?}", block.grid);
 
             CellAutomata {
                 name :"name".to_owned(),

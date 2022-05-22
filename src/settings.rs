@@ -8,7 +8,6 @@ pub const TRANSLATIONS_VON: [[i8; 3]; 6] = [
 ];
 
 
-//todo: the other type
 pub const TRANSLATIONS_MOORE: [[i8 ;3];27] = [
     [1, 0, 0],
     [1, 1, 0],

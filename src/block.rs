@@ -45,6 +45,7 @@ impl Block {
                     for x in min..max {
                         for y in min..max {
                             for z in min..max {
+                                //for indexing
                                 let max = max - 1;
                                 //if x or y or z == hollow max or Min then draw
                                 if x == min || x == max || y == min 
@@ -56,6 +57,7 @@ impl Block {
                     }
 
                 } else {
+                    //fill the whole thing
                     for x in instep..max {
                         for y in instep..max {
                             for z in instep..max {
@@ -71,7 +73,7 @@ impl Block {
     }
 
     ///passes in a grid and makes changes based on given rules
-    /// n_rule is how many to stay alive, b_rule for to be born, s_rule for hoe many game tics till dead
+    /// n_rule is how many to stay alive, b_rule for to be born, s_rule for how many game tics till dead
     pub fn update_grid(&mut self) {
 
         //because box value 1 is dead
@@ -81,8 +83,9 @@ impl Block {
             for y in 1.. (self.edge - 2) as usize {
                 for z in 1.. (self.edge - 2) as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
-                    if neighbors == 0 {continue;}
                     let grid_val: i8 = old_grid[[x, y, z]];
+
+                    if neighbors == 0 && grid_val == 1 {continue;}
                     
                     //0 = alive
                     //1 = dead
@@ -103,7 +106,7 @@ impl Block {
                         },
                         _ => {
                             //down a val per game tick until 1
-                                self.grid[[x, y, z]] = grid_val - 1;
+                                self.grid[[x, y, z]] = (grid_val - 1) as i8;
                         },
 
                     }
@@ -122,7 +125,8 @@ impl Block {
             //filter any neighbors thats value is alive (0) and collect.len()
             Method::Moore => {
                 let params  = settings::TRANSLATIONS_MOORE;
-             
+
+                //messy?
                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
 
             },
