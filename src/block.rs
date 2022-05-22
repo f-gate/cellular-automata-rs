@@ -12,7 +12,7 @@ pub enum Method {
 pub struct Block {
     pub method: Method,
     pub edge: i16,
-    pub size_factor: f32,
+    pub step_in: i16,
     pub size_bounds: i16,
     pub n_rule: [bool; 27],
     pub b_rule: [bool; 27],
@@ -23,7 +23,7 @@ pub struct Block {
 
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn init(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, size_factor: f32) -> Array3::<i8> {
+    pub fn init(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, step_in: i16) -> Array3::<i8> {
         let mut grid = Block::get_fresh_grid(&size_bounds);
         match start_shape.shape {
             settings::Shape::Diamond => {
@@ -32,23 +32,39 @@ impl Block {
                 //return diamond shape
             },
             settings::Shape::Cube => {
-                let draw_length = ((*edge - 1) as f32 * size_factor).round() as i16 ;
-                let instep = ((edge - draw_length) as f32 / 2.0) as i16;
+
+                let mut draw_length = (*edge - (step_in * 2)) as i16 ;
+                let instep = step_in;
+
+                let max = draw_length + instep; 
+                let min = instep;  
+
                 if start_shape.is_hollow {
-                    //todo
+                    for x in min..max {
+                        for y in min..max {
+                            for z in min..max {
+                                let max = max - 1;
+                                //if x or y or z == hollow max or Min then draw
+                                if x == min || x == max || y == min 
+                                || y == max || z == min || z == max  {
+                                    grid[[x as usize, y as usize, z as usize]] = 0;
+                                }
+                            }
+                        }
+                    }
+
                 } else {
-                    for x in instep..instep+draw_length {
-                        for y in instep..instep+draw_length {
-                            for z in instep..instep+draw_length {
+                    for x in instep..max {
+                        for y in instep..max {
+                            for z in instep..max {
                                 grid[[x as usize, y as usize, z as usize]] = 0;
                             }
                         }
                     }
                 }
-                //^^
-                //return cube shape
             },
         }
+        println!("{:?}", grid);
         return grid
     }
 
@@ -67,12 +83,12 @@ impl Block {
         //because box value 1 is dead
         let s_rule = self.s_rule + 1;
         let old_grid  = self.grid.clone();
-        for x in 1.. self.edge as usize {
-            for y in 1.. self.edge as usize {
-                for z in 1.. self.edge as usize {
+        for x in 1.. (self.edge - 2) as usize {
+            for y in 1.. (self.edge - 2) as usize {
+                for z in 1.. (self.edge - 2) as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
-
-                    let grid_val: i8= old_grid[[x, y, z]];
+                    if neighbors == 0 {continue;}
+                    let grid_val: i8 = old_grid[[x, y, z]];
                     
                     //0 = alive
                     //1 = dead
@@ -81,13 +97,13 @@ impl Block {
                     match grid_val {
                         0 => {
                             //if wrong amount of neighbors then die
-                            if self.n_rule[neighbors] == false {
+                            if self.n_rule[neighbors - 1] == false {
                                 self.grid[[x, y, z]] = s_rule;
                             } 
                         },
                         1 => {
                             //if dead check against rule and maybe come alive
-                            if self.b_rule[neighbors] == true {
+                            if self.b_rule[neighbors - 1] == true {
                                 self.grid[[x, y, z]] = 0;
                             }
                         },
@@ -106,13 +122,13 @@ impl Block {
     //get sum of neighbors that == 0
     pub fn get_neighbors(grid: &Array3::<i8>, x: usize, y:usize, z:usize, method: &Method) -> usize {
         if y == 0 || x == 0 || z == 0 {
-            panic!("cannot get neighbors of an edge. ")
+            panic!("Edges of the cube is out of bounds!!")
         }
 
         match method {
             Method::Moore => {
-                //filter any neighbors thats value is not alive (0) and collect.len()
-                settings::neighbor_params_moore
+                //filter any neighbors thats value is alive (0) and collect.len()
+                settings::TRANSLATIONS_MOORE
                 .iter()
                 .filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
             },
@@ -121,8 +137,8 @@ impl Block {
                 10 as usize
             },
         }
-        //i think it works lol 19/05
 
     }
+
 
 }
