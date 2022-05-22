@@ -1,5 +1,3 @@
-use block::Block;
-use eframe::egui;
 
 mod rule;
 mod gui;
