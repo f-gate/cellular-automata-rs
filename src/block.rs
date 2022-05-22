@@ -24,7 +24,9 @@ pub struct Block {
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
     pub fn init(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, step_in: i16) -> Array3::<i8> {
-        let mut grid = Block::get_fresh_grid(&size_bounds);
+        let edge_usize = *edge as usize;
+        let mut grid = Array3::<i8>::ones((edge_usize, edge_usize, edge_usize));
+
         match start_shape.shape {
             settings::Shape::Diamond => {
                 //todo:
@@ -68,14 +70,6 @@ impl Block {
         return grid
     }
 
-    ///get fresh grid on ones(dead and ready for respawn)
-    //todo:: pass in edge?
-    pub fn get_fresh_grid(size_bounds: &i16) -> Array3<i8> {
-        let edge = (*size_bounds as f32).cbrt().ceil() as usize;
-        Array3::<i8>::ones((edge, edge, edge))
-    }
-
-    
     ///passes in a grid and makes changes based on given rules
     /// n_rule is how many to stay alive, b_rule for to be born, s_rule for hoe many game tics till dead
     pub fn update_grid(&mut self) {
