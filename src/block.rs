@@ -1,6 +1,6 @@
 use ndarray::Array3;
 use std::*;
-use crate::settings as settings;
+use super::settings;
 
 #[derive(Debug)]
 pub enum Method {
@@ -11,7 +11,7 @@ pub enum Method {
 #[derive(Debug)]
 pub struct Block {
     pub method: Method,
-    pub edge: i16,
+    pub edge_max: i16,
     pub step_in: i16,
     pub size_bounds: i16,
     pub n_rule: [bool; 27],
@@ -23,7 +23,7 @@ pub struct Block {
 
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn init(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, step_in: i16) -> Array3::<i8> {
+    pub fn get_fresh_grid(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, step_in: i16) -> Array3::<i8> {
         let edge_usize = *edge as usize;
         let mut grid = Array3::<i8>::ones((edge_usize, edge_usize, edge_usize));
 
@@ -68,7 +68,7 @@ impl Block {
                 }
             },
         }
-        println!("{:?}", grid);
+    
         return grid
     }
 
@@ -79,13 +79,13 @@ impl Block {
         //because box value 1 is dead
         let s_rule = self.s_rule + 1;
         let old_grid  = self.grid.clone();
-        for x in 1.. (self.edge - 2) as usize {
-            for y in 1.. (self.edge - 2) as usize {
-                for z in 1.. (self.edge - 2) as usize {
+        for x in 1.. (self.edge_max - 2) as usize {
+            for y in 1.. (self.edge_max - 2) as usize {
+                for z in 1.. (self.edge_max - 2) as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
                     let grid_val: i8 = old_grid[[x, y, z]];
 
-                    if neighbors == 0 && grid_val == 1 {continue;}
+                    if neighbors == 0  {continue;}
                     
                     //0 = alive
                     //1 = dead

@@ -5,9 +5,35 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 eframe = "0.18"
-ndarray = "0.13.0"
 egui_glow = "0.18"
 glow = "0.11"
-three-d = { version = "0.11", default-features = false }
+three-d = { version = "0.11", default-features = false }    
+winit = "0.26"
+env_logger = "0.9"
+log = "0.4"
+wgpu = "0.12"
+pollster = "0.2"
+bytemuck = { version = "1.4", features = [ "derive" ] }
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"
+tobj = { version = "3.2.1", features = [
+    "async",
+]}
+reqwest = { version = "0.11" }
+console_error_panic_hook = "0.1.6"
+console_log = "0.2.0"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "Element",
+]}
+cfg-if = "1"
+ndarray = "0.13.0"
+cgmath = "0.18"
