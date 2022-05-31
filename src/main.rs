@@ -29,17 +29,13 @@ mod settings;
         grid: block::Block::get_fresh_grid(
           settings::StartShape{
             shape: settings::Shape::Cube,
-            is_hollow: false,
+            is_hollow: true,
         }, &edge_max,
           &size_bounds,
           step_in
         ),
     };
-    println!("{:?}", block.grid);
-    block.update_grid();
-    block.update_grid();
-    println!("{:?}", block.grid);
-
+  
 
     pollster::block_on(display::run(&block));
     
