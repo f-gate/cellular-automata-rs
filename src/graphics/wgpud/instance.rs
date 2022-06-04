@@ -1,6 +1,6 @@
 use ndarray::Array3;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Instance {
     pub position: cgmath::Vector3<f32>,
     pub color: [f32; 3],

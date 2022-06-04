@@ -29,7 +29,7 @@ mod settings;
         grid: block::Block::get_fresh_grid(
           settings::StartShape{
             shape: settings::Shape::Cube,
-            is_hollow: true,
+            is_hollow: false,
         }, &edge_max,
           &size_bounds,
           step_in

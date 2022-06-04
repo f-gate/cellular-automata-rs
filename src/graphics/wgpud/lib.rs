@@ -24,20 +24,29 @@ pub async fn run(block: Block) {
 
     env_logger::init();
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
     let mut block_m = block.clone();
 
+    
+    let window = WindowBuilder::new()
+        .with_decorations(true)
+        .with_title("3D Cellular Automata")
+        .with_inner_size(winit::dpi::LogicalSize::new(1980 , 1080))
+        .build(&event_loop)
+        .unwrap();
+    
     let mut state = State::new(&window, block).await;
-
 
         // run()
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
-                if state.frames_to_update as f32 % state.frames_to_update as f32 == 0.0 {
+                println!("{}", state.frame_num);
+
+                if state.frames_to_update as f32 % state.frame_num as f32 == 0.0 {
                     block_m.update_grid();
                 } 
-                state.update();
+                state.update(Instance::get_instances(&block_m.grid, block_m.edge_max)
+                                        .into_iter().flatten().collect::<_>());
                 match state.render() {
                     Ok(_) => {}
                     // econfigure the surface if lost
@@ -50,8 +59,6 @@ pub async fn run(block: Block) {
 
             }
             Event::MainEventsCleared => {
-                // RedrawRequested will only trigger once, unless we manually
-                // request it.
                 window.request_redraw();
             }
             Event::WindowEvent {
@@ -339,8 +346,16 @@ impl State {
         self.camera_controller.process_events(event)
     }
 
-    fn update(&mut self) {
-       
+    fn update(&mut self,instances: Vec<Instance>) {
+        self.instances = instances.clone();
+        let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        self.instance_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
