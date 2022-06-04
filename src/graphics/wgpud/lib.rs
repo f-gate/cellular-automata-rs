@@ -16,20 +16,27 @@ mod instance;
 mod model; 
 mod resources;
 mod texture;
-use crate::{block::Block, display::lib::instance::Instance};
+use crate::{block::{Block, self}};
+use instance::Instance as Instance;
 
 
-pub async fn run(block: &Block) {
+pub async fn run(block: Block) {
 
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
+    let mut block_m = block.clone();
+
     let mut state = State::new(&window, block).await;
+
 
         // run()
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
+                if state.frames_to_update as f32 % state.frames_to_update as f32 == 0.0 {
+                    block_m.update_grid();
+                } 
                 state.update();
                 match state.render() {
                     Ok(_) => {}
@@ -40,6 +47,7 @@ pub async fn run(block: &Block) {
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
                     Err(e) => eprintln!("{:?}", e),
                 }
+
             }
             Event::MainEventsCleared => {
                 // RedrawRequested will only trigger once, unless we manually
@@ -105,13 +113,13 @@ struct State {
     instance_buffer: wgpu::Buffer,
     obj_model: Model,
     depth_texture: texture::Texture,
-
-
+    frame_num: i64,
+    frames_to_update: i64,
 }
 
 impl State {
     // Creating some of the wgpu types requires async code
-    async fn new(window: &Window, block: &Block) -> Self {
+    async fn new(window: &Window, block: Block) -> Self {
         
         let size = window.inner_size();
         // The instance is a handle to our GPU
@@ -192,7 +200,7 @@ impl State {
                 buffers: &[
                     model::ModelVertex::desc(),
                     instance::InstanceRaw::desc(),
-                ], //  what type of verticies we want to pass to vertex (currently specifying in shader itself).
+                ], 
             },
             fragment: Some(wgpu::FragmentState { // optional, in charge of coloring.
                 module: &shader,
@@ -271,32 +279,8 @@ impl State {
             label: Some("camera_bind_group"),
         });
         let camera_controller = camera::CameraController::new(0.4);
-        const SPACE_BETWEEN: f32 = 2.5;
-        let instances: Vec<Option<Instance>> = (0..block.edge_max).flat_map(|z| {
-            (0..block.edge_max).flat_map(move |x| {
-                (0..block.edge_max).map(move |y| {
-                    if block.grid[[x as usize, y as usize, z as usize]] == 0 {
-                        let x = SPACE_BETWEEN * (x as f32 - block.edge_max as f32 / 2.0);
-                        let z = SPACE_BETWEEN * (z as f32 - block.edge_max as f32 / 2.0);
-                        let y = SPACE_BETWEEN * (y as f32 - block.edge_max as f32 / 2.0);
-                        
-                        let y_color = 0.1;
-                        let x_color = 0.1;
-                        let z_color = 0.1;
-                        
-                        let position = cgmath::Vector3 { x, y, z };
-                        
-                        Some(instance::Instance {
-                            position,
-                            color : cgmath::Vector3 {x : x_color, y:  y_color, z : z_color}.into(),
-                        })
-                    }else {
-                        None
-                    }    
-                })
-            })
-        }).collect::<Vec<_>>();
         
+        let instances = Instance::get_instances(&block.grid, block.edge_max);
         let instances : Vec<_> = instances.into_iter().flatten().collect();
         let instance_data: Vec<_> = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
         let instance_buffer = device.create_buffer_init(
@@ -333,6 +317,8 @@ impl State {
             instance_buffer,
             obj_model,
             depth_texture,
+            frame_num : 0,
+            frames_to_update : 100,
         }
 
 
@@ -354,6 +340,7 @@ impl State {
     }
 
     fn update(&mut self) {
+       
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
@@ -397,7 +384,8 @@ impl State {
 
             use model::DrawModel;
             render_pass.draw_mesh_instanced(&self.obj_model.meshes[0], 0..self.instances.len() as u32);
-}
+}       
+        self.frame_num += 1;
         // submit will accept anything that implements IntoIter
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();

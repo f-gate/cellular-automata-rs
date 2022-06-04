@@ -1,14 +1,15 @@
 use ndarray::Array3;
 use std::*;
 use super::settings;
+use cgmath::{prelude::*, num_traits::Num};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Method {
     VonNeumann, 
     Moore
 }
 /// an item containing all the cells to be passed to rendering and designating rules.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Block {
     pub method: Method,
     pub edge_max: i16,

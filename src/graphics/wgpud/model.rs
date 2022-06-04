@@ -11,6 +11,7 @@ pub trait Vertex {
 pub struct ModelVertex {
     pub position: [f32; 3],
     pub normal: [f32; 3],
+    //pub color: [f32; 3],
 
 }
 
@@ -32,6 +33,11 @@ impl Vertex for ModelVertex {
                     shader_location: 1,
                     format: wgpu::VertexFormat::Float32x3,
                 },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 5]>() as wgpu::BufferAddress,
+                    shader_location: 2,
+                    format: wgpu::VertexFormat::Float32x3,
+                },
               
             ],
         }
@@ -47,6 +53,7 @@ pub struct Model {
 
 pub struct Material {
     pub name: String,
+    //pub color: [f32; 3],
 }
 
 pub struct Mesh {
@@ -57,7 +64,6 @@ pub struct Mesh {
     pub material: usize,
 }
 
-// model.rs
 pub trait DrawModel<'a> {
     fn draw_mesh(&mut self, mesh: &'a Mesh);
     fn draw_mesh_instanced(

@@ -36,7 +36,7 @@ fn vs_main(
         instance.model_matrix_3,
     );
     var out: VertexOutput;
-    out.color = instance.color;
+    out.color = model.position;
     out.clip_position = camera.view_proj * model_matrix * vec4<f32>(model.position, 1.0);
     return out;
 }
@@ -45,7 +45,7 @@ fn vs_main(
 
 [[stage(fragment)]]
 fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
-    return vec4<f32>(0.1,0.1,0.1, 1.0);
+    return vec4<f32>(in.color, 1.0);
 }
 
  

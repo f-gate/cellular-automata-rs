@@ -1,3 +1,4 @@
+use ndarray::Array3;
 
 #[derive(Debug)]
 pub struct Instance {
@@ -11,6 +12,34 @@ impl Instance {
             color: self.color
         }
     }
+    pub fn get_instances(grid: &Array3<i8>, edge_max: i16) -> Vec<Option<Instance>> {
+        const SPACE_BETWEEN: f32 = 2.5;
+        let edge_max = edge_max;
+        (0..edge_max).flat_map(|z| {
+            (0..edge_max).flat_map(move |x| {
+                (0..edge_max).map(move |y| {
+                    if grid[[x as usize, y as usize, z as usize]] == 0 {
+                        let x = SPACE_BETWEEN * (x as f32 - edge_max as f32 / 2.0);
+                        let z = SPACE_BETWEEN * (z as f32 - edge_max as f32 / 2.0);
+                        let y = SPACE_BETWEEN * (y as f32 - edge_max as f32 / 2.0);
+                        
+                        let y_color = 0.1;
+                        let x_color = 0.1;
+                        let z_color = 0.1;
+                        
+                        let position = cgmath::Vector3 { x, y, z };
+                        
+                        Some(Self {
+                            position,
+                            color : cgmath::Vector3 {x : x_color, y:  y_color, z : z_color}.into(),
+                        })
+                    }else {
+                        None
+                    }    
+                })
+            })
+        }).collect::<Vec<_>>()
+    }
 }
 
 
@@ -18,7 +47,7 @@ impl Instance {
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct InstanceRaw {
-    model: [[f32; 4]; 4],
+    model: [[f32; 4]; 4],   
     pub color: [f32; 3],
 }
 impl InstanceRaw {

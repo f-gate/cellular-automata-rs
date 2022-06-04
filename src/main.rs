@@ -2,10 +2,10 @@
 mod rule;
 mod block;
 mod settings;
-#[path = "graphics/display.rs"] mod display;
+#[path = "graphics/wgpud/lib.rs"] mod display;
 
   fn main() {
-    let edge_max: i16 = 10;
+    let edge_max: i16 = 20;
     let step_in: i16 = 1;
     let size_bounds = (edge_max - step_in).pow(3);
     let n_rule = rule::Rule {
@@ -18,7 +18,7 @@ mod settings;
     };
     let s_rule = 10;
 
-    let mut block = block::Block {
+    let block = block::Block {
         method: block::Method::Moore,
         edge_max,
         step_in,
@@ -37,6 +37,6 @@ mod settings;
     };
   
 
-    pollster::block_on(display::run(&block));
+    pollster::block_on(display::run(block));
     
 }
