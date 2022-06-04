@@ -26,7 +26,7 @@ impl Rule {
 
             RuleGroup::Multiple(v) => {
                 for val in v {
-                    out[(val - 1) as usize] = true;
+                    out[*val as usize] = true;
                 }
                 return out
             },

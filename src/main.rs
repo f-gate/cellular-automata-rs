@@ -6,20 +6,20 @@ mod settings;
 
   fn main() {
     let edge_max: i16 = 20;
-    let step_in: i16 = 1;
-    let size_bounds = (edge_max - step_in).pow(3);
+    let step_in: i16 = 9;
+    let size_bounds = (edge_max - (step_in*2)).pow(3);
     let n_rule = rule::Rule {
         ruletype: rule::RuleType::Survival,
-        rulegroup: rule::RuleGroup::Multiple(vec![4,5,6,7]),
+        rulegroup: rule::RuleGroup::Multiple(vec![0,1,2,3,4,5,6]),
     };
     let b_rule = rule::Rule {
       ruletype: rule::RuleType::Birth,
-      rulegroup: rule::RuleGroup::Multiple(vec![6,7,8]),
+      rulegroup: rule::RuleGroup::Multiple(vec![1,3]),
     };
-    let s_rule = 10;
+    let s_rule = 2;
 
     let block = block::Block {
-        method: block::Method::Moore,
+        method: block::Method::VonNeumann,
         edge_max,
         step_in,
         size_bounds,

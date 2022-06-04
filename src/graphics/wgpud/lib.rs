@@ -40,13 +40,21 @@ pub async fn run(block: Block) {
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
-                println!("{}", state.frame_num);
 
-                if state.frames_to_update as f32 % state.frame_num as f32 == 0.0 {
+                if state.frame_num as f32 % state.frames_to_update as f32 == 0.0 {
+                println!("{}", state.frame_num);
                     block_m.update_grid();
+                    state.update_instances(
+                        Instance::get_instances(&block_m.grid, block_m.edge_max)
+                        .into_iter()
+                        .flatten()
+                        .collect::<_>());
+
+                println!("{:?}", state.instances);
+
                 } 
-                state.update(Instance::get_instances(&block_m.grid, block_m.edge_max)
-                                        .into_iter().flatten().collect::<_>());
+
+                state.update();
                 match state.render() {
                     Ok(_) => {}
                     // econfigure the surface if lost
@@ -125,6 +133,17 @@ struct State {
 }
 
 impl State {
+    fn update_instances(&mut self, instances: Vec<Instance>) {
+        self.instances = instances.clone();
+        let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        self.instance_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
+    }
     // Creating some of the wgpu types requires async code
     async fn new(window: &Window, block: Block) -> Self {
         
@@ -346,16 +365,8 @@ impl State {
         self.camera_controller.process_events(event)
     }
 
-    fn update(&mut self,instances: Vec<Instance>) {
-        self.instances = instances.clone();
-        let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
-        self.instance_buffer = self.device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Instance Buffer"),
-                contents: bytemuck::cast_slice(&instance_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
+    fn update(&mut self) {
+       
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_proj(&self.camera);
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
