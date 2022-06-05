@@ -41,16 +41,14 @@ pub async fn run(block: Block) {
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
 
+                //if update of grid to occur
                 if state.frame_num as f32 % state.frames_to_update as f32 == 0.0 {
-                println!("{}", state.frame_num);
                     block_m.update_grid();
                     state.update_instances(
                         Instance::get_instances(&block_m.grid, block_m.edge_max)
                         .into_iter()
                         .flatten()
                         .collect::<_>());
-
-                println!("{:?}", state.instances);
 
                 } 
 
@@ -270,7 +268,7 @@ impl State {
         let camera = camera::Camera {
             // position the camera one unit up and 2 units back
             // +z is out of the screen
-            eye: (0.0, 1.0, 2.0).into(),
+            eye: (0.0, 10.0, 100.0).into(),
             // have it look at the origin
             target: (0.0, 0.0, 0.0).into(),
             // which way is "up"
@@ -325,7 +323,6 @@ impl State {
         ).await.unwrap();
 
         let depth_texture = texture::Texture::create_depth_texture(&device, &config, "depth_texture");
-        println!("\n {:?}", instances);
         
         Self{
             surface,
@@ -344,7 +341,7 @@ impl State {
             obj_model,
             depth_texture,
             frame_num : 0,
-            frames_to_update : 100,
+            frames_to_update : 10,
         }
 
 

@@ -14,7 +14,6 @@ pub struct Block {
     pub method: Method,
     pub edge_max: i16,
     pub step_in: i16,
-    pub size_bounds: i16,
     pub n_rule: [bool; 27],
     pub b_rule: [bool; 27],
     pub s_rule: i8,
@@ -24,9 +23,9 @@ pub struct Block {
 
 impl Block {
     ///initialise the start shape with 1ns, process initial neighbors and spit out the array for processing.
-    pub fn get_fresh_grid(start_shape: settings::StartShape, edge:&i16, size_bounds: &i16, step_in: i16) -> Array3::<i8> {
+    pub fn get_fresh_grid(start_shape: settings::StartShape, edge:&i16, step_in: i16, s_rule: i8) -> Array3::<i8> {
         let edge_usize = *edge as usize;
-        let mut grid = Array3::<i8>::ones((edge_usize, edge_usize, edge_usize));
+        let mut grid = Array3::<i8>::zeros((edge_usize, edge_usize, edge_usize));
 
         match start_shape.shape {
             settings::Shape::Diamond => {
@@ -51,7 +50,7 @@ impl Block {
                                 //if x or y or z == hollow max or Min then draw
                                 if x == min || x == max || y == min 
                                 || y == max || z == min || z == max  {
-                                    grid[[x as usize, y as usize, z as usize]] = 0;
+                                    grid[[x as usize, y as usize, z as usize]] = s_rule ;
                                 }
                             }
                         }
@@ -62,7 +61,7 @@ impl Block {
                     for x in instep..max {
                         for y in instep..max {
                             for z in instep..max {
-                                grid[[x as usize, y as usize, z as usize]] = 0;
+                                grid[[x as usize, y as usize, z as usize]] = s_rule;
                             }
                         }
                     }
@@ -79,14 +78,12 @@ impl Block {
 
         let s_rule = self.s_rule - 1;
         let old_grid  = self.grid.clone();
-        for x in 1.. (self.edge_max - 2) as usize {
-            for y in 1.. (self.edge_max - 2) as usize {
-                for z in 1.. (self.edge_max - 2) as usize {
+        for x  in 1 as usize.. (self.edge_max - 2) as usize {
+            for y in 1 as usize.. (self.edge_max - 2) as usize {
+                for z in 1 as usize.. (self.edge_max - 2) as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
                     let grid_val: i8 = old_grid[[x, y, z]];
-
                     if neighbors == 0 {continue;}
-
 
                     match grid_val {
                         0 => {
@@ -95,14 +92,21 @@ impl Block {
                                 self.grid[[x, y, z]] = s_rule;
                             } 
                         },
-                        _alive => {
-                            //survival rule of state value one
+                        1 => {
                             if self.n_rule[neighbors - 1] == true {
+                                //stay at state 1
+                            } else {
+                                self.grid[[x, y, z]] = 0;
+
+                            }
+                        }
+                        _ => {
+                            if self.b_rule[neighbors - 1] == true {
                                 self.grid[[x, y, z]] = s_rule;
                             } else {
                                 self.grid[[x, y, z]] = (grid_val - 1) as i8;
                             }
-                        },
+                        }
                     }
                 }
             }   
@@ -121,13 +125,13 @@ impl Block {
                 let params  = settings::TRANSLATIONS_MOORE;
 
                 //messy?
-                params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 1).collect::<Vec<&[i8; 3]>>().len()
+                params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] > 0).collect::<Vec<&[i8; 3]>>().len()
 
             },
             Method::VonNeumann => {
                 let params  = settings::TRANSLATIONS_VON;
 
-                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 1).collect::<Vec<&[i8; 3]>>().len()
+                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] > 0).collect::<Vec<&[i8; 3]>>().len()
                 
             },
         }

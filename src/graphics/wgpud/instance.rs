@@ -18,7 +18,7 @@ impl Instance {
         (0..edge_max).flat_map(|z| {
             (0..edge_max).flat_map(move |x| {
                 (0..edge_max).map(move |y| {
-                    if grid[[x as usize, y as usize, z as usize]] == 0 {
+                    if grid[[x as usize, y as usize, z as usize]] > 0 {
                         let x = SPACE_BETWEEN * (x as f32 - edge_max as f32 / 2.0);
                         let z = SPACE_BETWEEN * (z as f32 - edge_max as f32 / 2.0);
                         let y = SPACE_BETWEEN * (y as f32 - edge_max as f32 / 2.0);
