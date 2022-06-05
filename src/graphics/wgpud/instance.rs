@@ -12,7 +12,7 @@ impl Instance {
             color: self.color
         }
     }
-    pub fn get_instances(grid: &Array3<i8>, edge_max: i16) -> Vec<Option<Instance>> {
+    pub fn get_instances(grid: &Array3<i8>, edge_max: i16) -> Vec<Instance> {
         const SPACE_BETWEEN: f32 = 2.5;
         let edge_max = edge_max;
         (0..edge_max).flat_map(|z| {
@@ -38,7 +38,7 @@ impl Instance {
                     }    
                 })
             })
-        }).collect::<Vec<_>>()
+        }).flatten().collect::<Vec<_>>()
     }
 }
 

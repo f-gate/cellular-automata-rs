@@ -9,13 +9,13 @@ mod settings;
     let step_in: i16 = 22  ;
     let n_rule = rule::Rule {
         ruletype: rule::RuleType::Survival,
-        rulegroup: rule::RuleGroup::Multiple(vec![4]),
+        rulegroup: rule::RuleGroup::Multiple(vec![4,5,6,7]),
     };
     let b_rule = rule::Rule {
       ruletype: rule::RuleType::Birth,
-      rulegroup: rule::RuleGroup::Multiple(vec![4]),
+      rulegroup: rule::RuleGroup::Multiple(vec![6,7,8]),
     };
-    let s_rule = 5;
+    let s_rule = 10;
 
     let mut block = block::Block {
         method: block::Method::Moore,

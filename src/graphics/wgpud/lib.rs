@@ -16,7 +16,7 @@ mod instance;
 mod model; 
 mod resources;
 mod texture;
-use crate::{block::{Block, self}};
+use crate::{block::{Block}};
 use instance::Instance as Instance;
 
 
@@ -46,11 +46,9 @@ pub async fn run(block: Block) {
                     block_m.update_grid();
                     state.update_instances(
                         Instance::get_instances(&block_m.grid, block_m.edge_max)
-                        .into_iter()
-                        .flatten()
-                        .collect::<_>());
+                    )
+                    }
 
-                } 
 
                 state.update();
                 match state.render() {
@@ -305,7 +303,6 @@ impl State {
         let camera_controller = camera::CameraController::new(0.4);
         
         let instances = Instance::get_instances(&block.grid, block.edge_max);
-        let instances : Vec<_> = instances.into_iter().flatten().collect();
         let instance_data: Vec<_> = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
         let instance_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -341,7 +338,7 @@ impl State {
             obj_model,
             depth_texture,
             frame_num : 0,
-            frames_to_update : 10,
+            frames_to_update : 20,
         }
 
 
