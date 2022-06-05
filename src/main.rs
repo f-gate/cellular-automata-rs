@@ -5,8 +5,8 @@ mod settings;
 #[path = "graphics/wgpud/lib.rs"] mod display;
 
   fn main() {
-    let edge_max: i16 = 20;
-    let step_in: i16 = 9;
+    let edge_max: i16 = 7;
+    let step_in: i16 = 1;
     let size_bounds = (edge_max - (step_in*2)).pow(3);
     let n_rule = rule::Rule {
         ruletype: rule::RuleType::Survival,
@@ -18,7 +18,7 @@ mod settings;
     };
     let s_rule = 2;
 
-    let block = block::Block {
+    let mut block = block::Block {
         method: block::Method::VonNeumann,
         edge_max,
         step_in,
@@ -35,6 +35,7 @@ mod settings;
           step_in
         ),
     };
+//    println!("{:?}", block.grid);
   
 
     pollster::block_on(display::run(block));

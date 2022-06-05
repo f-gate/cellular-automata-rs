@@ -77,8 +77,7 @@ impl Block {
     /// n_rule is how many to stay alive, b_rule for to be born, s_rule for how many game tics till dead
     pub fn update_grid(&mut self) {
 
-        //because box value 1 is dead
-        let s_rule = self.s_rule + 1;
+        let s_rule = self.s_rule - 1;
         let old_grid  = self.grid.clone();
         for x in 1.. (self.edge_max - 2) as usize {
             for y in 1.. (self.edge_max - 2) as usize {
@@ -86,30 +85,24 @@ impl Block {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
                     let grid_val: i8 = old_grid[[x, y, z]];
 
-                    if neighbors == 0  {continue;}
-                    
-                    //0 = alive
-                    //1 = dead
-                    //anything more is state
+                    if neighbors == 0 {continue;}
+
 
                     match grid_val {
                         0 => {
-                            //if wrong amount of neighbors then die
-                            if self.n_rule[neighbors - 1] == false {
+                            //if dead be born if correct amount of neighbors
+                            if self.b_rule[neighbors - 1] == true {
                                 self.grid[[x, y, z]] = s_rule;
                             } 
                         },
-                        1 => {
-                            //if dead check against rule and maybe come alive
-                            if self.b_rule[neighbors - 1] == true {
-                                self.grid[[x, y, z]] = 0;
+                        _alive => {
+                            //survival rule of state value one
+                            if self.n_rule[neighbors - 1] == true {
+                                self.grid[[x, y, z]] = s_rule;
+                            } else {
+                                self.grid[[x, y, z]] = (grid_val - 1) as i8;
                             }
                         },
-                        _ => {
-                            //down a val per game tick until 1
-                                self.grid[[x, y, z]] = (grid_val - 1) as i8;
-                        },
-
                     }
                 }
             }   
