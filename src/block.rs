@@ -121,13 +121,13 @@ impl Block {
                 let params  = settings::TRANSLATIONS_MOORE;
 
                 //messy?
-                params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+                params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 1).collect::<Vec<&[i8; 3]>>().len()
 
             },
             Method::VonNeumann => {
                 let params  = settings::TRANSLATIONS_VON;
 
-                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 0).collect::<Vec<&[i8; 3]>>().len()
+                 params.iter().filter(|p| grid[[(x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize ]] == 1).collect::<Vec<&[i8; 3]>>().len()
                 
             },
         }
