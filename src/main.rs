@@ -5,17 +5,17 @@ mod settings;
 #[path = "graphics/wgpud/lib.rs"] mod display;
 
   fn main() {
-    let edge_max: i16 = 50;
-    let step_in: i16 = 22  ;
+    let edge_max: i16 = 40;
+    let step_in: i16 = 5 ;
     let n_rule = rule::Rule {
         ruletype: rule::RuleType::Survival,
-        rulegroup: rule::RuleGroup::Multiple(vec![4,5,6,7]),
+        rulegroup: rule::RuleGroup::Multiple(vec![12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]),
     };
     let b_rule = rule::Rule {
       ruletype: rule::RuleType::Birth,
-      rulegroup: rule::RuleGroup::Multiple(vec![6,7,8]),
+      rulegroup: rule::RuleGroup::Multiple(vec![13, 14]),
     };
-    let s_rule = 10;
+    let s_rule = 2;
 
     let mut block = block::Block {
         method: block::Method::Moore,
@@ -33,11 +33,6 @@ mod settings;
           s_rule
         ),
     };
-   println!("{:?}", block.grid);
-  block.update_grid();
-  block.update_grid();
-   println!("{:?}", block.grid);
-  
 
     pollster::block_on(display::run(block));
     

@@ -2,6 +2,7 @@ use ndarray::Array3;
 use std::*;
 use super::settings;
 use cgmath::{prelude::*, num_traits::Num};
+#[path = "graphics/wgpud/instance.rs"] mod instance;
 
 #[derive(Debug, Clone)]
 pub enum Method {
@@ -74,7 +75,7 @@ impl Block {
 
     ///passes in a grid and makes changes based on given rules
     /// n_rule is how many to stay alive, b_rule for to be born, s_rule for how many game tics till dead
-    pub fn update_grid(&mut self) {
+    pub fn update_grid(&mut self)  {
 
         let s_rule = self.s_rule - 1;
         let old_grid  = self.grid.clone();
@@ -83,29 +84,22 @@ impl Block {
                 for z in 1 as usize.. (self.edge_max - 2) as usize {
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method);
                     let grid_val: i8 = old_grid[[x, y, z]];
-                    if neighbors == 0 {continue;}
 
                     match grid_val {
                         0 => {
                             //if dead be born if correct amount of neighbors
-                            if self.b_rule[neighbors - 1] == true {
+                            if self.b_rule[neighbors] == true {
                                 self.grid[[x, y, z]] = s_rule;
                             } 
                         },
                         1 => {
-                            if self.n_rule[neighbors - 1] == true {
-                                //stay at state 1
-                            } else {
+                            if self.n_rule[neighbors] == false {
                                 self.grid[[x, y, z]] = 0;
-
                             }
                         }
                         _ => {
-                            if self.b_rule[neighbors - 1] == true {
-                                self.grid[[x, y, z]] = s_rule;
-                            } else {
                                 self.grid[[x, y, z]] = (grid_val - 1) as i8;
-                            }
+
                         }
                     }
                 }

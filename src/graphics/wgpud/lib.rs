@@ -4,10 +4,9 @@ use wgpu::util::DeviceExt;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder, platform::unix::x11::ffi::WidthValue,
+    window::WindowBuilder,
 };
 
-use wgpu::Features;
 use cgmath::{prelude::*, num_traits::Num};
 use model::Vertex;
 
@@ -338,7 +337,7 @@ impl State {
             obj_model,
             depth_texture,
             frame_num : 0,
-            frames_to_update : 20,
+            frames_to_update : 5,
         }
 
 
