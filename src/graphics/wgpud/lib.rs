@@ -16,7 +16,6 @@ mod model;
 mod resources;
 mod texture;
 use crate::{block::{Block}};
-use instance::Instance as Instance;
 
 
 pub async fn run(block: Block) {
@@ -29,7 +28,7 @@ pub async fn run(block: Block) {
     let window = WindowBuilder::new()
         .with_decorations(true)
         .with_title("3D Cellular Automata")
-        .with_inner_size(winit::dpi::LogicalSize::new(1980 , 1080))
+        .with_inner_size(winit::dpi::LogicalSize::new(1980 as i32 , 1080))
         .build(&event_loop)
         .unwrap();
     
@@ -43,14 +42,21 @@ pub async fn run(block: Block) {
                 //if update of grid to occur
                 if state.frame_num as f32 % state.frames_to_update as f32 == 0.0 {
                     block_m.update_grid();
-                    state.update_instances(
-                        Instance::get_instances(&block_m.grid, block_m.edge_max)
-                    )
-                    }
-
+                    //todo put this into function
+                    let instances = block_m.instances.clone();
+                    let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+                    state.instance_len = instance_data.len() as i32;
+                    state.instance_buffer = state.device.create_buffer_init(
+                        &wgpu::util::BufferInitDescriptor {
+                            label: Some("Instance Buffer"),
+                            contents: bytemuck::cast_slice(&instance_data),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        }
+                    );
+                }
 
                 state.update();
-                match state.render() {
+                match state.render(&block_m) {
                     Ok(_) => {}
                     // econfigure the surface if lost
                     Err(wgpu::SurfaceError::Lost) => state.resize(state.size),
@@ -119,7 +125,7 @@ struct State {
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
     camera_controller: camera::CameraController,
-    instances: Vec<instance::Instance>,
+    instance_len: i32,
     instance_buffer: wgpu::Buffer,
     obj_model: Model,
     depth_texture: texture::Texture,
@@ -128,8 +134,7 @@ struct State {
 }
 
 impl State {
-    fn update_instances(&mut self, instances: Vec<Instance>) {
-        self.instances = instances.clone();
+    fn update_instances(&mut self, instances: Vec<instance::Instance>) {
         let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
         self.instance_buffer = self.device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -301,8 +306,8 @@ impl State {
         });
         let camera_controller = camera::CameraController::new(0.4);
         
-        let instances = Instance::get_instances(&block.grid, block.edge_max);
-        let instance_data: Vec<_> = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        let instance_data: Vec<_> = block.instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        let instance_len = instance_data.len() as i32;
         let instance_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Instance Buffer"),
@@ -332,12 +337,12 @@ impl State {
             camera_bind_group,
             camera_uniform,
             camera_controller,
-            instances,
             instance_buffer,
             obj_model,
             depth_texture,
             frame_num : 0,
-            frames_to_update : 5,
+            frames_to_update : 10,
+            instance_len
         }
 
 
@@ -365,7 +370,7 @@ impl State {
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
     }
 
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    fn render(&mut self, block: &Block) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -402,7 +407,7 @@ impl State {
             render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
 
             use model::DrawModel;
-            render_pass.draw_mesh_instanced(&self.obj_model.meshes[0], 0..self.instances.len() as u32);
+            render_pass.draw_mesh_instanced(&self.obj_model.meshes[0], 0..self.instance_len as u32);
 }       
         self.frame_num += 1;
         // submit will accept anything that implements IntoIter

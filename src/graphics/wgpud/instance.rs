@@ -4,41 +4,14 @@ use ndarray::Array3;
 pub struct Instance {
     pub position: cgmath::Vector3<f32>,
     pub color: [f32; 3],
+    pub index: usize,
 }
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
             model: (cgmath::Matrix4::from_translation(self.position)).into(),
-            color: self.color
+            color: cgmath::Matrix4::from_translation(self.position).into()
         }
-    }
-    pub fn get_instances(grid: &Array3<i8>, edge_max: i16) -> Vec<Instance> {
-        const SPACE_BETWEEN: f32 = 2.0;
-        let edge_max = edge_max;
-        (0..edge_max).flat_map(|z| {
-            (0..edge_max).flat_map(move |x| {
-                (0..edge_max).map(move |y| {
-                    if grid[[x as usize, y as usize, z as usize]] > 0  {
-                        let x = SPACE_BETWEEN * (x as f32 - edge_max as f32 / 2.0);
-                        let z = SPACE_BETWEEN * (z as f32 - edge_max as f32 / 2.0);
-                        let y = SPACE_BETWEEN * (y as f32 - edge_max as f32 / 2.0);
-                        
-                        let y_color = 0.1;
-                        let x_color = 0.1;
-                        let z_color = 0.1;
-                        
-                        let position = cgmath::Vector3 { x, y, z };
-                        
-                        Some(Self {
-                            position,
-                            color : cgmath::Vector3 {x : x_color, y:  y_color, z : z_color}.into(),
-                        })
-                    }else {
-                        None
-                    }    
-                })
-            })
-        }).flatten().collect::<Vec<_>>()
     }
 }
 
@@ -48,7 +21,7 @@ impl Instance {
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct InstanceRaw {
     model: [[f32; 4]; 4],   
-    pub color: [f32; 3],
+    pub color: [[f32; 4]; 4],
 }
 impl InstanceRaw {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
