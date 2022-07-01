@@ -33,18 +33,16 @@ pub async fn run(block: Block) {
         .unwrap();
     
     let mut state = State::new(&window, block).await;
-
         // run()
     event_loop.run(move |event, _, control_flow| {
+
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
 
                 //if update of grid to occur
                 if state.frame_num as f32 % state.frames_to_update as f32 == 0.0 {
                     block_m.update_grid();
-                    //todo put this into function
-                    let instances = block_m.instances.clone();
-                    let instance_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+                    let instance_data = block_m.instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
                     state.instance_len = instance_data.len() as i32;
                     state.instance_buffer = state.device.create_buffer_init(
                         &wgpu::util::BufferInitDescriptor {

@@ -5,8 +5,8 @@ mod settings;
 #[path = "graphics/wgpud/lib.rs"] mod display;
 
   fn main() {
-    let edge_max: i16 = 10;
-    let step_in: i16 = 4 ;
+    let edge_max: i16 = 50;
+    let step_in: i16 = 20 ;
     let n_rule = rule::Rule {
         ruletype: rule::RuleType::Survival,
         rulegroup: rule::RuleGroup::Multiple(vec![4]),
@@ -24,7 +24,7 @@ mod settings;
       edge_max,
       step_in,
       s_rule,
-      2.0);
+      3.0);
 
     let mut block = block::Block {
         method: block::Method::Moore,

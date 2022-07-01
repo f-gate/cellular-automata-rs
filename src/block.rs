@@ -1,8 +1,14 @@
+use glow::ATOMIC_COUNTER_BUFFER_REFERENCED_BY_TESS_CONTROL_SHADER;
 use ndarray::Array3;
 use std::*;
 use super::settings;
 use cgmath::{prelude::*, num_traits::{Num, Pow}};
 #[path = "graphics/wgpud/instance.rs"] mod instance;
+
+pub enum InstanceMethod {
+    Addition,
+    Deletion
+}
 
 #[derive(Debug, Clone)]
 pub enum Method {
@@ -39,6 +45,7 @@ impl Block {
         let edge_usize = edge as usize;
         let mut grid: Vec<i8> = vec![0; edge_usize.pow(3)];
         let mut instances: Vec<instance::Instance> = vec![];
+
         match start_shape.shape {
             settings::Shape::Diamond => {
                 //todo:
@@ -63,7 +70,7 @@ impl Block {
                                 || y == max || z == min || z == max  {
                                     let index = Block::get_index(x,y,z, edge); 
 
-                                     grid[index] = s_rule;
+                                     grid[index] = s_rule - 1 ;
                                      let x = space_between * (x as f32 - edge as f32 / 2.0);
                                      let z = space_between * (z as f32 - edge as f32 / 2.0);
                                      let y = space_between * (y as f32 - edge as f32 / 2.0);
@@ -84,8 +91,7 @@ impl Block {
                         for y in step_in..max {
                             for z in step_in..max {
                                 let index = Block::get_index(x,y,z, edge); 
-                                grid[index] = s_rule;
-                                println!("{}", index);
+                                grid[index] = s_rule - 1;
                                 
                                 let x = space_between * (x as f32 - edge as f32 / 2.0);
                                 let z = space_between * (z as f32 - edge as f32 / 2.0);
@@ -105,18 +111,24 @@ impl Block {
         (grid, instances)
     }
 
+    pub fn get_updates() -> Vec<(u8, InstanceMethod)> {
+        todo!();
+    }
+
     ///passes in a grid and makes changes based on given rules
     /// n_rule is how many to stay alive, b_rule for to be born, s_rule for how many game tics till dead
     pub fn update_grid(&mut self)  {
 
-        let s_rule = self.s_rule - 1;
         let old_grid  = self.grid.clone();
+        let mut index_remove : Vec<usize> = vec![];
+
+        //clean out all current instances
+        self.instances = vec![];
 
         for x  in 1 .. (self.edge_max - 2)  {
             for y in 1 .. (self.edge_max - 2) {
                 for z in 1.. (self.edge_max - 2) {
-                    let mut index_remove : Vec<usize> = vec![];
-                    let mut index_add : Vec<usize> = vec![];
+                    let mut index_add : bool = false;
 
                     let index = Block::get_index(x, y, z, self.edge_max);
                     let neighbors: usize = Block::get_neighbors(&old_grid, x, y, z, &self.method, self.edge_max);
@@ -124,42 +136,46 @@ impl Block {
 
 
                     //if survival rule is false then take the grid val down per tick
-                    if self.n_rule[neighbors] == false && grid_val != 0 {
+                    if self.n_rule[neighbors] == false && grid_val != 1 && grid_val != 0 {
                         self.grid[Block::get_index(x,y,z, self.edge_max)] = (grid_val - 1) as i8;
                     }
                     
                     //if born rule is true then be born
-                    if self.b_rule[neighbors] == true {
-                        self.grid[Block::get_index(x,y,z, self.edge_max)] = s_rule;
-                        if grid_val == 0 {
-                            index_add.push(index);
-                        }
+                    if self.b_rule[neighbors] == true && grid_val == 0 {
+                        self.grid[Block::get_index(x,y,z, self.edge_max)] = self.s_rule - 1;
+                            index_add = true;
                     }
 
                     if grid_val == 0 {
                         index_remove.push(index);
                     }
-                    let x = self.space_between_blocks * (x as f32 - self.edge_max as f32 / 2.0);
-                    let z = self.space_between_blocks * (z as f32 - self.edge_max as f32 / 2.0);
-                    let y = self.space_between_blocks * (y as f32 - self.edge_max as f32 / 2.0);
-                    self.instances.iter_mut().filter(|i| !i.index == index );
-                    self.instances.push( instance::Instance {
-                                     position: cgmath::Vector3 {x: x as f32,y:  y as f32,z:  z as f32},
-                                    color: cgmath::Vector3 {x: x as f32,y:  y as f32,z:  z as f32}.into(),  
-                                    index,
-                    })                    
+                    
+                    if index_add == true {
+                        let x = self.space_between_blocks * (x as f32 - self.edge_max as f32 / 2.0);
+                        let z = self.space_between_blocks * (z as f32 - self.edge_max as f32 / 2.0);
+                        let y = self.space_between_blocks * (y as f32 - self.edge_max as f32 / 2.0);
+                    
+                        self.instances.push( instance::Instance {
+                            position: cgmath::Vector3 {x: x as f32,y:  y as f32,z:  z as f32},
+                           color: cgmath::Vector3 {x: x as f32,y:  y as f32,z:  z as f32}.into(),  
+                           index,
+                        });
+                        
+                    }
+
                 }
             }   
         }
+
     }
     
-    //get sum of neighbors that == 0
+    //get sum of neighbors that > 0
     pub fn get_neighbors(grid: &Vec<i8>, x: i16, y:i16, z:i16, method: &Method, edge_size: i16) -> usize {
         if y == 0 || x == 0 || z == 0 {
             panic!("Edges of the cube is out of bounds!!")
         }
         match method {
-            //filter any neighbors thats value is alive (0) and collect.len()
+            //filter any neighbors thats value is alive > 0 and collect.len()
             Method::Moore => {
                 let params  = settings::TRANSLATIONS_MOORE;
                 //messy?                            grid[get_index((x as i8 +p[0]) as usize, (y as i8+p[1]) as usize, (z as i8+p[2]) as usize)]
